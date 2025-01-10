@@ -1,20 +1,85 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+// REACT NATIVE
+import { ImageBackground, Text, View } from 'react-native';
+
+// ASSETS
+import hotBackground from './assets/img/hot.png';
+import coldBackground from './assets/img/cold.png';
+
+// STYLES
+import { styles } from './App.style';
+
+// COMPONENTS
+import InputTemp from './Components/InputTemp/InputTemp';
+import TempDisplay from './Components/TempDisplay/TempDisplay';
+import ConvertButton from './Components/ConvertButon/ConvertButton';
+
+// CONSTANT
+import { DEFAULT_TEMP, DEFAULT_UNITS, UNITS } from './constant';
+
+// REACT
+import { useState, useEffect } from 'react';
+
+// SERVICES
+import {
+    getOppositeUnit,
+    convertTempTo,
+    isIceTemp,
+} from './services/temp-service';
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+    // STATE
+    const [currentUnit, setCurrentUnit] = useState(DEFAULT_UNITS);
+    const [inputValue, setInputValue] = useState(DEFAULT_TEMP);
+    const [currentBackground, setCurrentBackground] = useState();
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+    const oppositeUnit = getOppositeUnit(currentUnit);
+
+    // USE EFFECT
+    useEffect(() => {
+        const tempAsFloat = Number.parseFloat(inputValue);
+        if (!isNaN(tempAsFloat)) {
+            const isColdBackground = isIceTemp(inputValue, currentUnit);
+            setCurrentBackground(
+                isColdBackground ? coldBackground : hotBackground
+            );
+        }
+    }, [inputValue, currentUnit]);
+
+    function getConvertedTemp() {
+        const valueAsFloat = Number.parseFloat(inputValue);
+        return isNaN(valueAsFloat)
+            ? ''
+            : convertTempTo(oppositeUnit, valueAsFloat).toFixed(1);
+    }
+
+    return (
+        <>
+            <ImageBackground
+                style={styles.container}
+                source={currentBackground}
+            >
+                <View style={styles.workspace}>
+                    <TempDisplay
+                        value={getConvertedTemp()}
+                        unit={oppositeUnit}
+                    ></TempDisplay>
+
+                    <InputTemp
+                        defaultValue={DEFAULT_TEMP}
+                        onChangeText={setInputValue}
+                        unit={currentUnit}
+                    ></InputTemp>
+
+                    <View>
+                        <ConvertButton
+                            unit={currentUnit}
+                            onPress={() => {
+                                setCurrentUnit(oppositeUnit);
+                            }}
+                        />
+                    </View>
+                </View>
+            </ImageBackground>
+        </>
+    );
+}
