@@ -6,12 +6,14 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignContent: 'center',
     },
+
     input: {
         backgroundColor: '#F1F1F1',
         fontSize: 35,
         borderRadius: 20,
         paddingHorizontal: 20,
         height: 50,
+        boxShadow: '3 3 10 #111',
     },
 
     unit: {
